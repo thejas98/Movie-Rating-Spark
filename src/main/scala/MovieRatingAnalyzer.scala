@@ -27,7 +27,14 @@ object MovieRatingAnalyzer {
 
 
   def calculateMeanAndStdDev(movieData: DataFrame): DataFrame = {
-    movieData.select(mean("imdb_score").as("mean_rating"), stddev("imdb_score").as("std_dev_rating"))
+    if (movieData.columns.contains("imdb_score")) {
+      movieData.select(mean("imdb_score").as("mean_rating"), stddev("imdb_score").as("std_dev_rating"))
+    } else {
+      println("Error: 'imdb_score' column not found in the CSV file. Upload a proper csv file.")
+
+      //returning an empty dataframe if the column is not present in the csv
+      movieData.limit(0)
+    }
   }
 }
 

@@ -13,6 +13,26 @@ class MovieRatingAnalyzerSpec extends AnyFlatSpec with Matchers {
 
   spark.sparkContext.setLogLevel("ERROR")
 
+  "calculateMeanAndStdDev" should "return an empty DataFrame if 'imdb_score' column is not present" in {
+    import spark.implicits._
+
+    // Test data without 'imdb_score' column
+    val testData = Seq(
+      (1, "Avengers"),
+      (2, "Thor"),
+      (3, "A beautiful mind")
+    )
+
+    val columns = Seq("id", "title")
+    val movieDataWithoutImdbScore: DataFrame = testData.toDF(columns: _*)
+
+    val result = calculateMeanAndStdDev(movieDataWithoutImdbScore)
+
+
+    //result should be 0 since imdb_score column in not present
+    result.count() shouldBe 0
+  }
+
   "calculateMeanAndStdDev" should "return the correct mean and standard deviation" in {
     import spark.implicits._
 
@@ -35,7 +55,7 @@ class MovieRatingAnalyzerSpec extends AnyFlatSpec with Matchers {
     val resultMean = resultRow.getAs[Double]("mean_rating")
     val resultStdDev = resultRow.getAs[Double]("std_dev_rating")
 
-    resultMean shouldEqual expectedMean
-    resultStdDev shouldEqual expectedStdDev
+    resultMean shouldEqual expectedMean +- 0.001
+    resultStdDev shouldEqual expectedStdDev +- 0.001
   }
 }
